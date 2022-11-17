@@ -64,10 +64,18 @@ public class ListPeopleController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("list-people-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 640, 480);
-            Stage stage= new Stage();
+            Stage stage = new Stage();
             stage.setTitle("Create People");
             stage.setScene(scene);
+            stage.setAlwaysOnTop(true);
             stage.show();
+            stage.setOnCloseRequest(event -> {
+                try {
+                    loadPeopleFromServer();
+                } catch (IOException e) {
+                    error("An error occured while communicating with the server");
+                }
+            });
         } catch (IOException e) {
             error("Couldn't load form", e.getMessage());
         }
@@ -76,27 +84,27 @@ public class ListPeopleController {
     @FXML
     public void deleteClick(ActionEvent actionEvent) {
         int selectIndex = peopleTable.getSelectionModel().getSelectedIndex();
-        if (selectIndex == -1){
-            Alert alert=new Alert(Alert.AlertType.WARNING);
+        if (selectIndex == -1) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setHeaderText("Please select a person");
             alert.show();
             return;
         }
         Person selected = peopleTable.getSelectionModel().getSelectedItem();
-        Alert confirmation= new Alert(Alert.AlertType.CONFIRMATION);
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setHeaderText(String.format("Are u sure want to delete %s", selected.getName()));
-        Optional<ButtonType> optionalButtonType=confirmation.showAndWait();
-        if (optionalButtonType.isEmpty()){
+        Optional<ButtonType> optionalButtonType = confirmation.showAndWait();
+        if (optionalButtonType.isEmpty()) {
             System.err.println("Unkown error occured");
             return;
         }
-        ButtonType clickedButton= optionalButtonType.get();
-        if (clickedButton.equals(ButtonType.OK)){
+        ButtonType clickedButton = optionalButtonType.get();
+        if (clickedButton.equals(ButtonType.OK)) {
             String url = App.BASE_URL + "/" + selected.getId();
             try {
                 RequestHandler.delete(url);
                 loadPeopleFromServer();
-            }catch (IOException e){
+            } catch (IOException e) {
                 error("An error occured while cummunicating with the server");
             }
         }
@@ -106,11 +114,11 @@ public class ListPeopleController {
     public void updateClick(ActionEvent actionEvent) {
     }
 
-    private void error(String headerText){
-       error(headerText, "");
+    private void error(String headerText) {
+        error(headerText, "");
     }
 
-    private void error(String headerText, String contentText){
+    private void error(String headerText, String contentText) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText(headerText);
         alert.setContentText(contentText);
